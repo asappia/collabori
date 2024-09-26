@@ -66,7 +66,7 @@ mod tests {
                 id: op.id().clone()
             }
         );
-        assert_eq!(rga.elements[0].visible, false);
+        assert!(!rga.elements[0].visible);
     }
 
     #[test]

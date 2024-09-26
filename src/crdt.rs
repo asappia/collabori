@@ -82,7 +82,7 @@ mod tests {
         let mut rga = RGA::new();
         rga.insert(0, 'a');
         let _op = rga.delete(0);
-        assert_eq!(rga.elements[0].visible, false);
+        assert!(!rga.elements[0].visible);
     }
 
     #[test]

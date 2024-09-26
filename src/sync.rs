@@ -122,7 +122,9 @@ mod tests {
 
         // Connect a client to the server
         let url = Url::parse(&format!("ws://{}", addr)).unwrap();
-        let (mut ws_stream, _) = connect_async(url).await.expect("Failed to connect");
+        let (mut ws_stream, _) = connect_async(url.as_str())
+            .await
+            .expect("Failed to connect");
 
         // Send a message from the client
         let op = Operation::Insert {

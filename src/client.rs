@@ -17,7 +17,9 @@ impl SyncClient {
         let url = Url::parse(&format!("ws://{}", addr)).unwrap();
 
         // Establish the WebSocket connection
-        let (ws_stream, _) = connect_async(url.as_str()).await.expect("Failed to connect");
+        let (ws_stream, _) = connect_async(url.as_str())
+            .await
+            .expect("Failed to connect");
         let (mut write, mut read) = ws_stream.split();
 
         // Create channels for sending and receiving operations
