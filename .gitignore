@@ -1,0 +1,78 @@
+# ==============================
+# Rust
+# ==============================
+
+# Compiled binary
+/target/
+
+# Remove Cargo's lock files for libraries
+# (For applications, you might want to keep Cargo.lock)
+/**/Cargo.lock
+
+# Build scripts
+/build/
+
+# Rust toolchains and caches
+/.rustup/
+/.cargo/
+
+# Coverage reports
+/coverage/
+
+# Benchmark reports
+/benchmark_reports/
+/benches/criterion/
+
+# ==============================
+# IDE and Editor Settings
+# ==============================
+
+# IntelliJ IDEA
+/.idea/
+/*.iml
+/**/*.iml
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Vim
+*.swp
+*.swo
+*.swn
+*.vim
+
+# ==============================
+# Operating System Files
+# ==============================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.cache/
+
+# Criterion reports
+target/criterion/
+benchmark_reports/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+

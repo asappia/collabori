@@ -1,0 +1,106 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [ "**" ]          # Triggers on all branches for push events
+  pull_request:
+    branches: [ "**" ]          # Triggers on all branches for pull request events
+  # Optional: Run benchmarks on a schedule (e.g., nightly)
+  schedule:
+    - cron: "0 0 * * *" # every day at midnight
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Rust
+      uses: actions/setup-rust@v3
+      with:
+        rust-version: stable
+
+    - name: Cache Cargo registry
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+
+    - name: Cache Cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-build-
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Run Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Check Formatting
+      run: cargo fmt -- --check
+
+    - name: Run Tests
+      run: cargo test --verbose
+
+  benchmark:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable, beta, nightly]
+
+    needs: build  # Ensure benchmarks run after a successful build
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Rust
+      uses: actions/setup-rust@v3
+      with:
+        rust-version: ${{ matrix.rust }}
+
+    - name: Cache Cargo registry
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-bench
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+
+    - name: Cache Cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}-bench
+        restore-keys: |
+          ${{ runner.os }}-cargo-build-
+
+    - name: Build Benchmarks
+      run: cargo build --bench benchmark
+
+    - name: Run Benchmarks
+      run: |
+        cargo bench
+        # Optionally, move Criterion reports to a specific directory
+        mkdir -p benchmark_reports
+        cp -r target/criterion benchmark_reports/
+
+    - name: Upload Benchmark Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-reports
+        path: benchmark_reports/
