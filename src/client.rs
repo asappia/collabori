@@ -6,8 +6,8 @@ use url::Url;
 
 #[derive(Debug)]
 pub struct SyncClient {
-    pub sender: mpsc::Sender<Operation>,          // For sending operations to the server
-    pub receiver: mpsc::Receiver<Operation>,      // For receiving operations from the server
+    pub sender: mpsc::Sender<Operation>, // For sending operations to the server
+    pub receiver: mpsc::Receiver<Operation>, // For receiving operations from the server
 }
 
 impl SyncClient {
@@ -21,8 +21,8 @@ impl SyncClient {
         let (mut write, mut read) = ws_stream.split();
 
         // Create channels for sending and receiving operations
-        let (send_tx, mut send_rx) = mpsc::channel::<Operation>(100);    // Sender to send ops to server
-        let (recv_tx, recv_rx) = mpsc::channel::<Operation>(100);    // Receiver to receive ops from server
+        let (send_tx, mut send_rx) = mpsc::channel::<Operation>(100); // Sender to send ops to server
+        let (recv_tx, recv_rx) = mpsc::channel::<Operation>(100); // Receiver to receive ops from server
 
         // Spawn a task to handle sending operations to the server
         tokio::spawn(async move {
@@ -48,7 +48,7 @@ impl SyncClient {
                     Ok(tokio_tungstenite::tungstenite::Message::Text(text)) => {
                         if let Ok(op) = serde_json::from_str::<Operation>(&text) {
                             println!("Received operation: {:?}", op);
-                            let _ = recv_tx.send(op).await;    // Send received op to the receiver channel
+                            let _ = recv_tx.send(op).await; // Send received op to the receiver channel
                         }
                     }
                     Ok(tokio_tungstenite::tungstenite::Message::Close(_)) => {
@@ -59,7 +59,7 @@ impl SyncClient {
                         println!("Error receiving message: {:?}", e);
                         break;
                     }
-                    _ => {}    // Ignore other message types
+                    _ => {} // Ignore other message types
                 }
             }
             println!("Receive task has been terminated.");
@@ -113,7 +113,7 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(100)).await;
 
         // Connect the second client
-        let mut client2 = SyncClient::connect(addr).await;    // Declare client2 as mutable
+        let mut client2 = SyncClient::connect(addr).await; // Declare client2 as mutable
 
         // Send another operation from client1
         let op2 = Operation::Insert {
@@ -125,7 +125,10 @@ mod tests {
 
         // Attempt to receive the operation on client2
         if let Some(received_op) = client2.receiver.recv().await {
-            assert_eq!(received_op, op2, "client2 did not receive the expected operation");
+            assert_eq!(
+                received_op, op2,
+                "client2 did not receive the expected operation"
+            );
             println!("Test passed: client2 received the expected operation.");
         } else {
             panic!("Did not receive the expected operation on client2");
@@ -135,7 +138,8 @@ mod tests {
         sync_manager.shutdown().await;
 
         // Wait for the server to confirm shutdown
-        let shutdown_confirmation = tokio::time::timeout(Duration::from_secs(5), shutdown_handle.recv()).await;
+        let shutdown_confirmation =
+            tokio::time::timeout(Duration::from_secs(5), shutdown_handle.recv()).await;
         assert!(
             shutdown_confirmation.is_ok(),
             "Server did not shut down in time"

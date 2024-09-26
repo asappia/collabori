@@ -105,9 +105,9 @@ async fn handle_connection(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio::time::{timeout, Duration};
     use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
     use url::Url;
-    use tokio::time::{timeout, Duration};
 
     #[tokio::test]
     async fn test_sync_manager() {
@@ -147,7 +147,8 @@ mod tests {
         sync_manager.shutdown().await;
 
         // Wait for the server to shut down
-        timeout(Duration::from_secs(5), shutdown_rx.recv()).await
+        timeout(Duration::from_secs(5), shutdown_rx.recv())
+            .await
             .expect("Server didn't shut down in time");
     }
 }

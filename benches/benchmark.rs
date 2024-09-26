@@ -1,11 +1,19 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use collabori::ot::OT;
 use collabori::crdt::RGA;
 use collabori::data::Operation;
+use collabori::ot::OT;
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn bench_transform(c: &mut Criterion) {
-    let op_a = Operation::Insert { index: 1, value: 'a', id: "1".into() };
-    let op_b = Operation::Insert { index: 2, value: 'b', id: "2".into() };
+    let op_a = Operation::Insert {
+        index: 1,
+        value: 'a',
+        id: "1".into(),
+    };
+    let op_b = Operation::Insert {
+        index: 2,
+        value: 'b',
+        id: "2".into(),
+    };
 
     c.bench_function("OT Transform Insert Insert", |b| {
         b.iter(|| {
@@ -45,5 +53,11 @@ fn bench_crdt_merge(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_transform, bench_crdt_insert, bench_crdt_delete, bench_crdt_merge);
+criterion_group!(
+    benches,
+    bench_transform,
+    bench_crdt_insert,
+    bench_crdt_delete,
+    bench_crdt_merge
+);
 criterion_main!(benches);

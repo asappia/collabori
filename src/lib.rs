@@ -1,13 +1,13 @@
+pub mod client;
 pub mod crdt;
 pub mod data;
 pub mod ot;
 pub mod sync;
 pub mod utils;
-pub mod client;
 
+use crate::client::SyncClient;
 use crate::data::Operation;
 use crate::sync::SyncManager;
-use crate::client::SyncClient;
 /// Trait for CRDT algorithms
 pub trait CRDT {
     fn insert(&mut self, index: usize, value: char) -> Operation;
@@ -41,7 +41,14 @@ mod tests {
     fn test_crdt_insert() {
         let mut rga = RGA::new();
         let op = rga.insert(0, 'a');
-        assert_eq!(op, Operation::Insert { index: 0, value: 'a', id: op.id().clone() });
+        assert_eq!(
+            op,
+            Operation::Insert {
+                index: 0,
+                value: 'a',
+                id: op.id().clone()
+            }
+        );
         assert_eq!(rga.elements.len(), 1);
         assert_eq!(rga.elements[0].value, 'a');
         assert!(rga.elements[0].visible);
@@ -52,7 +59,13 @@ mod tests {
         let mut rga = RGA::new();
         rga.insert(0, 'a');
         let op = rga.delete(0);
-        assert_eq!(op, Operation::Delete { index: 0, id: op.id().clone() });
+        assert_eq!(
+            op,
+            Operation::Delete {
+                index: 0,
+                id: op.id().clone()
+            }
+        );
         assert_eq!(rga.elements[0].visible, false);
     }
 
@@ -73,32 +86,60 @@ mod tests {
 
     #[test]
     fn test_ot_transform_insert_insert() {
-        let op_a = Operation::Insert { index: 1, value: 'a', id: "1".into() };
-        let op_b = Operation::Insert { index: 2, value: 'b', id: "2".into() };
+        let op_a = Operation::Insert {
+            index: 1,
+            value: 'a',
+            id: "1".into(),
+        };
+        let op_b = Operation::Insert {
+            index: 2,
+            value: 'b',
+            id: "2".into(),
+        };
         let result = OT::transform(&op_a, &op_b);
         assert_eq!(result, op_a);
     }
 
     #[test]
     fn test_ot_transform_insert_delete() {
-        let op_a = Operation::Insert { index: 1, value: 'a', id: "1".into() };
-        let op_b = Operation::Delete { index: 2, id: "2".into() };
+        let op_a = Operation::Insert {
+            index: 1,
+            value: 'a',
+            id: "1".into(),
+        };
+        let op_b = Operation::Delete {
+            index: 2,
+            id: "2".into(),
+        };
         let result = OT::transform(&op_a, &op_b);
         assert_eq!(result, op_a);
     }
 
     #[test]
     fn test_ot_transform_delete_insert() {
-        let op_a = Operation::Delete { index: 1, id: "1".into() };
-        let op_b = Operation::Insert { index: 2, value: 'b', id: "2".into() };
+        let op_a = Operation::Delete {
+            index: 1,
+            id: "1".into(),
+        };
+        let op_b = Operation::Insert {
+            index: 2,
+            value: 'b',
+            id: "2".into(),
+        };
         let result = OT::transform(&op_a, &op_b);
         assert_eq!(result, op_a);
     }
 
     #[test]
     fn test_ot_transform_delete_delete() {
-        let op_a = Operation::Delete { index: 1, id: "1".into() };
-        let op_b = Operation::Delete { index: 2, id: "2".into() };
+        let op_a = Operation::Delete {
+            index: 1,
+            id: "1".into(),
+        };
+        let op_b = Operation::Delete {
+            index: 2,
+            id: "2".into(),
+        };
         let result = OT::transform(&op_a, &op_b);
         assert_eq!(result, op_a);
     }

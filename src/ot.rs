@@ -1,5 +1,6 @@
 use crate::data::Operation;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
 /// Operational Transformation (OT) implementation
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -10,89 +11,67 @@ impl OT {
     pub fn transform(op_a: &Operation, op_b: &Operation) -> Operation {
         match (op_a, op_b) {
             (Operation::Insert { index: idx_a, .. }, Operation::Insert { index: idx_b, .. }) => {
-                if idx_a < idx_b {
-                    op_a.clone()
-                } else if idx_a > idx_b {
-                    match op_a {
-                        Operation::Insert {
-                            index: _,
-                            value,
-                            id,
-                        } => Operation::Insert {
+                match idx_a.cmp(idx_b) {
+                    Ordering::Less => op_a.clone(),
+                    Ordering::Greater => match op_a {
+                        Operation::Insert { value, id, .. } => Operation::Insert {
                             index: idx_a + 1,
                             value: *value,
                             id: id.clone(),
                         },
                         _ => op_a.clone(),
-                    }
-                } else {
-                    // If both operations insert at the same index, we need to decide the order
-                    // Here, we can use the id to decide the order deterministically
-                    if op_a.id() < op_b.id() {
-                        op_a.clone()
-                    } else {
-                        match op_a {
-                            Operation::Insert {
-                                index: _,
-                                value,
-                                id,
-                            } => Operation::Insert {
+                    },
+                    Ordering::Equal => match op_a.id().cmp(&op_b.id()) {
+                        Ordering::Less => op_a.clone(),
+                        Ordering::Greater => match op_a {
+                            Operation::Insert { value, id, .. } => Operation::Insert {
                                 index: idx_a + 1,
                                 value: *value,
                                 id: id.clone(),
                             },
                             _ => op_a.clone(),
-                        }
-                    }
+                        },
+                        Ordering::Equal => op_a.clone(),
+                    },
                 }
             }
             (Operation::Insert { index: idx_a, .. }, Operation::Delete { index: idx_b, .. }) => {
-                if idx_a <= idx_b {
-                    op_a.clone()
-                } else {
-                    match op_a {
-                        Operation::Insert {
-                            index: _,
-                            value,
-                            id,
-                        } => Operation::Insert {
+                match idx_a.cmp(idx_b) {
+                    Ordering::Less | Ordering::Equal => op_a.clone(),
+                    Ordering::Greater => match op_a {
+                        Operation::Insert { value, id, .. } => Operation::Insert {
                             index: idx_a - 1,
                             value: *value,
                             id: id.clone(),
                         },
                         _ => op_a.clone(),
-                    }
+                    },
                 }
             }
             (Operation::Delete { index: idx_a, .. }, Operation::Insert { index: idx_b, .. }) => {
-                if idx_a < idx_b {
-                    op_a.clone()
-                } else {
-                    match op_a {
-                        Operation::Delete { index: _, id } => Operation::Delete {
+                match idx_a.cmp(idx_b) {
+                    Ordering::Less => op_a.clone(),
+                    Ordering::Greater => match op_a {
+                        Operation::Delete { id, .. } => Operation::Delete {
                             index: idx_a + 1,
                             id: id.clone(),
                         },
                         _ => op_a.clone(),
-                    }
+                    },
+                    Ordering::Equal => op_a.clone(),
                 }
             }
             (Operation::Delete { index: idx_a, .. }, Operation::Delete { index: idx_b, .. }) => {
-                if idx_a == idx_b {
-                    // Both deletes target the same index
-                    // Handle idempotency by keeping one delete
-                    // Here, we return op_a
-                    op_a.clone()
-                } else if idx_a < idx_b {
-                    op_a.clone()
-                } else {
-                    match op_a {
-                        Operation::Delete { index: _, id } => Operation::Delete {
+                match idx_a.cmp(idx_b) {
+                    Ordering::Equal => op_a.clone(),
+                    Ordering::Less => op_a.clone(),
+                    Ordering::Greater => match op_a {
+                        Operation::Delete { id, .. } => Operation::Delete {
                             index: idx_a - 1,
                             id: id.clone(),
                         },
                         _ => op_a.clone(),
-                    }
+                    },
                 }
             }
         }
