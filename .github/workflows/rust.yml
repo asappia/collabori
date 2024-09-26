@@ -9,6 +9,9 @@ on:
   schedule:
     - cron: "0 0 * * *" # every day at midnight
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   build:
 
@@ -16,22 +19,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Rust
-      uses: rust-lang/setup-rust@v1
-      with:
-        rust-version: stable
-
-    - name: Cache Cargo registry
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-registry-
+      uses: actions/checkout@v4
 
     - name: Cache Cargo build
       uses: actions/cache@v3
@@ -42,7 +30,7 @@ jobs:
           ${{ runner.os }}-cargo-build-
 
     - name: Build
-      run: cargo build --verbose
+      run: cargo build
 
     - name: Run Clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
@@ -51,7 +39,7 @@ jobs:
       run: cargo fmt -- --check
 
     - name: Run Tests
-      run: cargo test --verbose
+      run: cargo test
 
   benchmark:
     runs-on: ${{ matrix.os }}
@@ -65,21 +53,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
-    - name: Set up Rust
-      uses: rust-lang/setup-rust@v1
-      with:
-        rust-version: ${{ matrix.rust }}
-
-    - name: Cache Cargo registry
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-bench
-        restore-keys: |
-          ${{ runner.os }}-cargo-registry-
 
     - name: Cache Cargo build
       uses: actions/cache@v3
