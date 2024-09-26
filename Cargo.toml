@@ -8,18 +8,18 @@ license = "MIT"
 repository = "https://github.com/asappia/collabori"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1.30", features = ["full"] }
-tokio-tungstenite = "0.20"
-thiserror = "1.0"
-uuid = { version = "1.1", features = ["v4"] }
-futures-util = "0.3"
-url = "2.2"
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+tokio = { version = "*", features = ["full"] }
+tokio-tungstenite = "*"
+thiserror = "*"
+uuid = { version = "*", features = ["v4"] }
+futures-util = "*"
+url = "*"
 
 [dev-dependencies]
-criterion = "0.5.1"
-cargo-tarpaulin = "0.31.2"
+criterion = "*"
+cargo-tarpaulin = "*"
 
 [[bench]]
 name = "benchmark"
