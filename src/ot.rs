@@ -21,7 +21,7 @@ impl OT {
                         },
                         _ => op_a.clone(),
                     },
-                    Ordering::Equal => match op_a.id().cmp(&op_b.id()) {
+                    Ordering::Equal => match op_a.id().cmp(op_b.id()) {
                         Ordering::Less => op_a.clone(),
                         Ordering::Greater => match op_a {
                             Operation::Insert { value, id, .. } => Operation::Insert {
