@@ -6,6 +6,7 @@ edition = "2021"
 description = "A real-time collaborative editing engine using CRDTs and OT."
 license = "MIT"
 repository = "https://github.com/asappia/collabori"
+readme = "README.md"
 
 [dependencies]
 serde = { version = "*", features = ["derive"] }
